@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block main %}
+<h1 class="page-header">Files</h1>
+<p>Showing files.</p>
+<div class = "row">
+    <div class = "column">
+        <ul>
+            {%for img in files%}
+                <li></li>
+                    <img src="static/uploads/{{img}}" />
+                    
+                </li>
+            {%endfor%}
+        </ul>
+    </div>
+</div>
+
+
+{% endblock %}

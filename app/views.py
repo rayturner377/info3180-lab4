@@ -9,10 +9,15 @@ from app import app
 from flask import render_template, request, redirect, url_for, flash, session, abort
 from werkzeug.utils import secure_filename
 
+from .forms import UploadForm
 
 ###
 # Routing for your application.
 ###
+w = os.path.abspath(os.path.dirname(__file__))
+v = os.getcwd()
+
+print(v)
 
 @app.route('/')
 def home():
@@ -32,15 +37,31 @@ def upload():
         abort(401)
 
     # Instantiate your form class
-
+    form = UploadForm()
+    
     # Validate file upload on submit
     if request.method == 'POST':
         # Get file data and save to your uploads folder
+        if form.validate_on_submit():
+            f = form.photo.data
+            filename = secure_filename(f.filename)
+            #f.save(w.join(app.config['UPLOAD_FOLDER'], filename))
+            f.save(os.path.join(w,app.config['UPLOAD_FOLDER'], filename))
+            flash('File Saved', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('File Not Saved', 'success')
+            return redirect(url_for('home'))
 
-        flash('File Saved', 'success')
-        return redirect(url_for('home'))
+    return render_template('upload.html',form = form)
 
-    return render_template('upload.html')
+@app.route('/files')
+def files():
+    
+    if not session.get('logged_in'):
+        abort(401)
+    files = os.listdir(w+"/"+app.config['UPLOAD_FOLDER'])
+    return render_template('files.html',files = files)
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -99,7 +120,11 @@ def add_header(response):
 def page_not_found(error):
     """Custom 404 page."""
     return render_template('404.html'), 404
-
-
+'''
+@app.route('/file-upload')
+def contact():
+    form = ContactForm()
+    return render_template('contact.html', form = form)
+'''
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port="8080")
